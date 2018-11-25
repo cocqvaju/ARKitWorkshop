@@ -41,11 +41,19 @@ extension ViewController {
     // --------------------------------
     
     @objc func didTapView(sender: UITapGestureRecognizer) {
-        
+        let location = sender.location(in: sender.view)
+        if let result = sceneView.hitTest(location, types: .existingPlane).first {
+            let anchor = ARAnchor(transform: result.worldTransform)
+            sceneView.session.add(anchor: anchor)
+        }
     }
     
     func view(_ view: ARSKView, nodeFor anchor: ARAnchor) -> SKNode? {        
+        if anchor is ARPlaneAnchor {
+            return SKLabelNode(text: "⛳️")
+        }
 
+        return SKLabelNode(text: "📍")
     }
 }
 
