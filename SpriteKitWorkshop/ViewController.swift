@@ -56,6 +56,26 @@ extension ViewController {
         rect.addChild(pin)
         pin.physicsBody = SKPhysicsBody(rectangleOf: pin.frame.size, center: CGPoint(x: 0, y: pin.frame.width/2))
         rect.physicsBody = SKPhysicsBody(edgeLoopFrom: rect.frame)
+        
+        pin.physicsBody?.collisionBitMask = bitmask
+        pin.physicsBody?.categoryBitMask = bitmask
+        rect.physicsBody?.collisionBitMask = bitmask
+        rect.physicsBody?.categoryBitMask = bitmask
+        rect.lineWidth = 0
+        
+        bitmask = bitmask << 1
+        if bitmask == 0 {
+            bitmask = 1
+        }
+        
+        // Since pins after overflow may collide, let's empty the physicsbody after fall animation
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2), execute: {
+            pin.physicsBody = nil
+            rect.physicsBody = nil
+            
+            // Clean up to make sure
+            pin.position.y = 0
+        })
 
         return rect
     }
