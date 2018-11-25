@@ -13,42 +13,14 @@ import ARKit
 extension ViewController {
     
     @objc func didTapView(sender: UITapGestureRecognizer) {
-        //----- Assignment 1; introduce plane detection to work with and place pins
         let location = sender.location(in: sender.view)
         if let result = sceneView.hitTest(location, types: .existingPlane).first {
             let anchor = ARAnchor(transform: result.worldTransform)
             sceneView.session.add(anchor: anchor)
         }
-        //-----------------------------------------------------------
     }
     
-    func view(_ view: ARSKView, nodeFor anchor: ARAnchor) -> SKNode? {        
-        //----- Assignment 1; introduce plane detection to work with and place pins
-//        if anchor is ARPlaneAnchor {
-//            return SKLabelNode(text: "⛳️")
-//        }
-//
-//        return SKLabelNode(text: "📍")
-        //-----------------------------------------------------------
-        
-        
-        //----- Assignment 2; have some physics in the pin, notice the mess because of 2d!
-//        if anchor is ARPlaneAnchor {
-//            return SKLabelNode(text: "⛳️")
-//        }
-//
-//        let pin = SKLabelNode(text: "📍")
-//        let rect = SKShapeNode(rect: CGRect(x: -pin.frame.width/2, y: 0, width: pin.frame.width, height: 250))
-//        pin.position.y = rect.frame.height - pin.frame.height
-//        rect.addChild(pin)
-//        pin.physicsBody = SKPhysicsBody(rectangleOf: pin.frame.size, center: CGPoint(x: 0, y: pin.frame.width/2))
-//        rect.physicsBody = SKPhysicsBody(edgeLoopFrom: rect.frame)
-//
-//        return rect
-        //-----------------------------------------------------------
-        
-        
-        //----- Assignment 3; let's fix this mess
+    func view(_ view: ARSKView, nodeFor anchor: ARAnchor) -> SKNode? {
         if anchor is ARPlaneAnchor {
             return SKLabelNode(text: "⛳️")
         }
@@ -60,8 +32,6 @@ extension ViewController {
         pin.physicsBody = SKPhysicsBody(rectangleOf: pin.frame.size, center: CGPoint(x: 0, y: pin.frame.width/2))
         rect.physicsBody = SKPhysicsBody(edgeLoopFrom: rect.frame)
 
-
-        // Have a "unique" physics body so pins won't collide
         pin.physicsBody?.collisionBitMask = bitmask
         pin.physicsBody?.categoryBitMask = bitmask
         rect.physicsBody?.collisionBitMask = bitmask
@@ -73,18 +43,14 @@ extension ViewController {
             bitmask = 1
         }
 
-        // Since pins after overflow may collide, let's empty the physicsbody after fall animation
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2), execute: {
             pin.physicsBody = nil
             rect.physicsBody = nil
 
-            // Clean up to make sure
             pin.position.y = 0
         })
 
-
         return rect
-        //-----------------------------------------------------------
     }
 }
 
@@ -92,15 +58,11 @@ class ViewController: UIViewController, ARSKViewDelegate {
     
     @IBOutlet var sceneView: ARSKView!
     
-    //----- Assignment 3; let's fix this mess
     var bitmask: UInt32 = 1
-    //-----------------------------------------------------------
-
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Show statistics such as fps and node count
         sceneView.showsFPS = true
         sceneView.showsNodeCount = true
         
