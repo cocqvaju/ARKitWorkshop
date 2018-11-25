@@ -13,94 +13,55 @@ import ARKit
 extension ViewController {
     
     @objc func didTapView(sender: UITapGestureRecognizer) {
-        //----- Assignment 1; introduce plane detection to work with and place pins
         let location = sender.location(in: sender.view)
         if let result = sceneView.hitTest(location, types: .existingPlane).first {
             let anchor = ARAnchor(transform: result.worldTransform)
             sceneView.session.add(anchor: anchor)
         }
-        //-----------------------------------------------------------
     }
     
-    func view(_ view: ARSKView, nodeFor anchor: ARAnchor) -> SKNode? {        
-        //----- Assignment 1; introduce plane detection to work with and place pins
-//        if anchor is ARPlaneAnchor {
-//            return SKLabelNode(text: "⛳️")
-//        }
-//
-//        return SKLabelNode(text: "📍")
-        //-----------------------------------------------------------
-        
-        
-        //----- Assignment 2; have some physics in the pin, notice the mess because of 2d!
-//        if anchor is ARPlaneAnchor {
-//            return SKLabelNode(text: "⛳️")
-//        }
-//
-//        let pin = SKLabelNode(text: "📍")
-//        let rect = SKShapeNode(rect: CGRect(x: -pin.frame.width/2, y: 0, width: pin.frame.width, height: 250))
-//        pin.position.y = rect.frame.height - pin.frame.height
-//        rect.addChild(pin)
-//        pin.physicsBody = SKPhysicsBody(rectangleOf: pin.frame.size, center: CGPoint(x: 0, y: pin.frame.width/2))
-//        rect.physicsBody = SKPhysicsBody(edgeLoopFrom: rect.frame)
-//
-//        return rect
-        //-----------------------------------------------------------
-        
-        
-        //----- Assignment 3; let's fix this mess
+    // --------  Assignment 2  --------
+    // At the end of assignment 1 we've already seen some limitations of a 2d world but let's explore that some more.
+    // We're going to add some physics by having our pins "drop" into our scene.
+    //
+    //  1. Change our return return SKLabelNode(text: "📍") by saving the labelNode in a let called pin
+    //  2. Next we're going to define a cylinder that will contain our pin in which it can fall to the bottom
+    //      Define a SKShapeNode called rect with the following rect: CGRect(x: -pin.frame.width/2, y: 0, width: pin.frame.width, height: 250)
+    //  3. Let's set our pin to the top of the cylinder by setting the pin.position.y to the rect.frame.height - the pin.frame.height
+    //      This will move the pin to the top of our cilinder in our 2d world
+    //  4. Let's add the pin as a child to our rect
+    //  5. Now we're going to define a physicsbody for our pin, assign a SKPhysicsBody to our pin.physicsBody
+    //      Create the SKPhysicsBody with the rectangleOf the pin frame size and define the center as x:0 y: pin.frame.width/2
+    //      Our pin has some physics now but will never stop falling since it doesn't collide with anything
+    //      Run the app, you'll see the rectangle but the pin will fall straight through the bottom
+    //  6. Let's add a physicsbody to our rect as well, assign a SKPhysicsBody with an edgeLoopFrom: rect.frame
+    //
+    //
+    //
+    //  If you add 1 pin it will work like you'd expect it to
+    //  Once you start adding more pins however you'll quickly see how this is becoming messy,
+    //      pins dropping on top of other pins and other cylinders
+    //  In the next assignments we'll clean that up!
+    // --------------------------------
+    
+    func view(_ view: ARSKView, nodeFor anchor: ARAnchor) -> SKNode? {
         if anchor is ARPlaneAnchor {
             return SKLabelNode(text: "⛳️")
         }
-
-        let pin = SKLabelNode(text: "📍")
-        let rect = SKShapeNode(rect: CGRect(x: -pin.frame.width/2, y: 0, width: pin.frame.width, height: 250))
-        pin.position.y = rect.frame.height - pin.frame.height
-        rect.addChild(pin)
-        pin.physicsBody = SKPhysicsBody(rectangleOf: pin.frame.size, center: CGPoint(x: 0, y: pin.frame.width/2))
-        rect.physicsBody = SKPhysicsBody(edgeLoopFrom: rect.frame)
-
-
-        // Have a "unique" physics body so pins won't collide
-        pin.physicsBody?.collisionBitMask = bitmask
-        pin.physicsBody?.categoryBitMask = bitmask
-        rect.physicsBody?.collisionBitMask = bitmask
-        rect.physicsBody?.categoryBitMask = bitmask
-        rect.lineWidth = 0
-
-        bitmask = bitmask << 1
-        if bitmask == 0 {
-            bitmask = 1
-        }
-
-        // Since pins after overflow may collide, let's empty the physicsbody after fall animation
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2), execute: {
-            pin.physicsBody = nil
-            rect.physicsBody = nil
-
-            // Clean up to make sure
-            pin.position.y = 0
-        })
-
-
-        return rect
-        //-----------------------------------------------------------
+        
+        return SKLabelNode(text: "📍")        
     }
 }
+
+// Everything below this line is boilerplate, just some code to get SpriteKit up and running
 
 class ViewController: UIViewController, ARSKViewDelegate {
     
     @IBOutlet var sceneView: ARSKView!
     
-    //----- Assignment 3; let's fix this mess
-    var bitmask: UInt32 = 1
-    //-----------------------------------------------------------
-
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Show statistics such as fps and node count
         sceneView.showsFPS = true
         sceneView.showsNodeCount = true
         
