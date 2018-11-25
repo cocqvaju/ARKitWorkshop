@@ -48,8 +48,15 @@ extension ViewController {
         if anchor is ARPlaneAnchor {
             return SKLabelNode(text: "⛳️")
         }
-        
-        return SKLabelNode(text: "📍")        
+
+        let pin = SKLabelNode(text: "📍")
+        let rect = SKShapeNode(rect: CGRect(x: -pin.frame.width/2, y: 0, width: pin.frame.width, height: 250))
+        pin.position.y = rect.frame.height - pin.frame.height
+        rect.addChild(pin)
+        pin.physicsBody = SKPhysicsBody(rectangleOf: pin.frame.size, center: CGPoint(x: 0, y: pin.frame.width/2))
+        rect.physicsBody = SKPhysicsBody(edgeLoopFrom: rect.frame)
+
+        return rect
     }
 }
 
