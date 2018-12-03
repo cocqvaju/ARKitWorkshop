@@ -75,9 +75,34 @@ import ARKit
 // --------------------------------
 
 class Plane: SCNNode {
+    let plane: SCNBox
+    let planeNode: SCNNode
+    let planeHeight: Float = 0.1
     
     override init() {
+        plane = SCNBox(width: 1, height: CGFloat(planeHeight), length: 1, chamferRadius: 0)
+        planeNode = SCNNode(geometry: plane)
         super.init()
+        addChildNode(planeNode)
+        show(true)
+    }
+    
+    func show(_ visible: Bool) {
+        var materials = Array(repeating: SCNNode.material(for: UIColor.clear), count: 6)
+        if visible {
+            let color = UIColor.green.withAlphaComponent(0.7)
+            materials[4] = SCNNode.material(for: color)
+        }
+        plane.materials = materials
+    }
+    
+    func update(for anchor: ARPlaneAnchor) {
+        plane.width = CGFloat(anchor.extent.x)
+        plane.length = CGFloat(anchor.extent.z)
+        let shape = SCNPhysicsShape(geometry: plane, options: nil)
+        planeNode.physicsBody = SCNPhysicsBody(type: .static, shape: shape)
+        planeNode.position = SCNVector3(x: anchor.center.x, y: -planeHeight/2, z: anchor.center.z)
+        
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -89,6 +114,21 @@ extension ViewController {
     
     @objc func didTapView(sender: UITapGestureRecognizer) {
         
+    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        if let planeAnchor = anchor as? ARPlaneAnchor {
+            let plane = Plane()
+            plane.update(for: planeAnchor)
+            planes[planeAnchor] = plane
+            node.addChildNode(plane)
+        }
+    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
+        if let planeAnchor = anchor as? ARPlaneAnchor, let plane = planes[planeAnchor] {
+            plane.update(for: planeAnchor)
+        }
     }
 }
 
